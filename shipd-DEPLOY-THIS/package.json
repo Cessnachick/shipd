@@ -1,0 +1,9 @@
+{
+  "name": "shipd",
+  "version": "1.0.0",
+  "description": "shipd — turn your posts into a product. With Bill Guard (S2) + Watchdog (S1) agents.",
+  "private": true,
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}

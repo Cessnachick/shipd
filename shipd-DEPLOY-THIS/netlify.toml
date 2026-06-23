@@ -1,0 +1,8 @@
+[build]
+  functions = "netlify/functions"
+  publish = "."
+
+# AGENT S1 — Watchdog runs once a day at 13:00 UTC (~9am Toronto)
+# Sends you the daily health + usage summary.
+[functions."watchdog"]
+  schedule = "0 13 * * *"
