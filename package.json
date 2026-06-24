@@ -1,0 +1,10 @@
+{
+  "name": "shipd",
+  "version": "1.0.0",
+  "description": "shipd — turn your posts into a product.",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  }
+}

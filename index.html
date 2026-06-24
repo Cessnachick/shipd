@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>shipd — turn your posts into a product</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%2314141a'/%3E%3Ccircle cx='50' cy='58' r='15' fill='%23FF3D8B'/%3E%3C/svg%3E">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+  :root {
+    --ink:#14141a; --black:#14141a; --paper:#fff; --soft:#f6f6f8; --line:#e4e4ea;
+    --teal:#0FB5A8; --teal-bright:#0FD0BE; --pink:#FF3D8B; --pink-deep:#e62d77;
+    --muted:#6c6c78; --shadow:0 1px 3px rgba(20,20,26,.05),0 12px 32px rgba(20,20,26,.08);
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  ::selection { background:var(--pink); color:#fff; }
+  html { scroll-behavior:smooth; }
+  body { font-family:'Inter',sans-serif; background:var(--paper); color:var(--ink); line-height:1.55; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; font-size:17px; }
+  .wrap { max-width:720px; margin:0 auto; padding:0 24px; }
+  /* visible keyboard focus — a senior accessibility detail */
+  a:focus-visible, button:focus-visible, textarea:focus-visible, select:focus-visible { outline:2px solid var(--teal); outline-offset:3px; border-radius:6px; }
+  header { background:var(--black); padding:22px 0; border-bottom:1px solid rgba(255,255,255,.06); }
+  .brand { display:flex; align-items:baseline; gap:13px; }
+  .logo { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:27px; letter-spacing:-.035em; color:#fff; }
+  .logo .dot { color:var(--pink); }
+  .tagline { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--teal-bright); text-transform:uppercase; letter-spacing:.14em; }
+  .hero { padding:72px 0 44px; }
+  .eyebrow { display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--pink); text-transform:uppercase; letter-spacing:.16em; margin-bottom:22px; font-weight:500; }
+  .eyebrow::before { content:""; width:6px; height:6px; border-radius:50%; background:var(--pink); box-shadow:0 0 0 0 rgba(255,61,139,.5); animation:livePulse 2s ease-in-out infinite; }
+  @keyframes livePulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,61,139,.5)} 50%{box-shadow:0 0 0 5px rgba(255,61,139,0)} }
+  h1 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(42px,8.5vw,66px); line-height:.98; letter-spacing:-.035em; margin-bottom:22px; color:var(--ink); }
+  h1 .pop { color:var(--pink); }
+  .sub { font-size:21px; color:#3a3a44; max-width:520px; line-height:1.5; font-weight:400; }
+  .panel { background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:32px; box-shadow:var(--shadow); margin-bottom:24px; }
+  .panel-label { font-weight:700; font-size:19px; margin-bottom:6px; color:#14141a; letter-spacing:-.01em; }
+  .panel-hint { font-size:16px; color:#56565f; margin-bottom:18px; line-height:1.5; }
+  .chips { display:flex; gap:10px; flex-wrap:wrap; }
+  .chip { font-size:16px; font-weight:600; background:var(--soft); border:1.5px solid #d6d6de; color:#14141a; padding:12px 22px; border-radius:30px; cursor:pointer; transition:border-color .18s, color .18s, transform .18s, box-shadow .18s; font-family:'Inter',sans-serif; position:relative; }
+  .chip:hover { border-color:var(--teal); color:var(--teal); transform:translateY(-2px); }
+  .chip.active { background:var(--teal); color:#fff; border-color:var(--teal); }
+  /* gentle attention pulse — draws the eye without harsh blinking */
+  .chip.pulse { animation:chipPulse 2.4s ease-in-out infinite; }
+  .chip:nth-child(2).pulse { animation-delay:.35s; }
+  .chip:nth-child(3).pulse { animation-delay:.7s; }
+  .chip:nth-child(4).pulse { animation-delay:1.05s; }
+  @keyframes chipPulse {
+    0%, 100% { box-shadow:0 0 0 0 rgba(255,61,139,0); border-color:#d6d6de; }
+    50% { box-shadow:0 0 0 4px rgba(255,61,139,.1); border-color:var(--pink); }
+  }
+  /* once a user has interacted, stop pulsing (don't nag) */
+  .chips.touched .chip.pulse { animation:none; }
+  @media (prefers-reduced-motion: reduce) {
+    .chip.pulse, .eyebrow::before { animation:none; }
+    html { scroll-behavior:auto; }
+  }
+  textarea { width:100%; min-height:148px; border:1.5px solid var(--line); border-radius:14px; padding:16px 18px; font-family:'Inter',sans-serif; font-size:16px; line-height:1.6; color:var(--ink); background:var(--soft); resize:vertical; transition:border-color .18s, background .18s, box-shadow .18s; margin-top:8px; }
+  textarea::placeholder { color:#9a9aa4; }
+  textarea:focus { outline:none; border-color:var(--teal); background:#fff; box-shadow:0 0 0 4px rgba(15,181,168,.1); }
+  .btn { display:inline-flex; align-items:center; gap:11px; background:var(--pink); color:#fff; border:none; border-radius:14px; padding:18px 34px; font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:700; cursor:pointer; margin-top:24px; transition:background .18s, transform .12s, box-shadow .18s; letter-spacing:-.01em; box-shadow:0 4px 16px rgba(255,61,139,.28); }
+  .btn:hover { background:var(--pink-deep); transform:translateY(-2px); box-shadow:0 10px 26px rgba(255,61,139,.36); }
+  .btn:active { transform:translateY(0); box-shadow:0 4px 16px rgba(255,61,139,.28); }
+  .btn:disabled { opacity:.5; cursor:not-allowed; box-shadow:none; transform:none; }
+  /* quiet orchestrated load-in — elements settle in sequence */
+  .reveal { opacity:0; transform:translateY(12px); animation:revealUp .6s cubic-bezier(.2,.7,.3,1) forwards; }
+  .reveal.d1 { animation-delay:.05s; }
+  .reveal.d2 { animation-delay:.15s; }
+  .reveal.d3 { animation-delay:.27s; }
+  .reveal.d4 { animation-delay:.4s; }
+  @keyframes revealUp { to { opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity:1; transform:none; animation:none; }
+  }
+  .loading { display:none; align-items:center; gap:14px; margin-top:24px; font-size:17px; color:var(--muted); font-weight:500; }
+  .loading.show { display:flex; }
+  .spinner { width:22px; height:22px; border:3px solid var(--line); border-top-color:var(--pink); border-radius:50%; animation:spin .7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .results { display:none; }
+  .results.show { display:block; animation:rise .4s ease; }
+  @keyframes rise { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+  .result-head { display:flex; align-items:center; gap:12px; margin:10px 0 14px; }
+  .result-head .chk { width:30px; height:30px; border-radius:50%; background:var(--teal); color:#fff; display:grid; place-items:center; font-size:17px; font-weight:700; }
+  .result-head h2 { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:28px; letter-spacing:-.02em; }
+  .ai-note { font-size:14.5px; color:var(--muted); margin:0 0 22px; font-style:italic; line-height:1.5; }
+  .out { background:var(--paper); border:2px solid var(--line); border-radius:18px; padding:28px 30px; margin-bottom:18px; box-shadow:var(--shadow); }
+  .out .kicker { font-family:'JetBrains Mono',monospace; font-size:13px; text-transform:uppercase; letter-spacing:.12em; color:var(--teal); margin-bottom:14px; font-weight:500; }
+  .out h3 { font-family:'Space Grotesk',sans-serif; font-size:30px; font-weight:700; line-height:1.1; letter-spacing:-.02em; margin-bottom:10px; color:var(--ink); }
+  .out .price-tag { display:inline-block; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; color:#fff; background:var(--teal); padding:8px 18px; border-radius:30px; margin:12px 0 20px; }
+  .out p { font-size:18px; margin-bottom:14px; color:var(--ink); }
+  .out p.who { font-size:16px; color:var(--muted); }
+  .out .module { border-left:3px solid var(--pink); padding-left:18px; margin-bottom:18px; }
+  .out .module strong { font-size:18px; color:var(--ink); }
+  .out .module span { display:block; font-size:15.5px; color:var(--muted); margin-top:3px; }
+  .salescopy { font-size:19px; line-height:1.55; color:var(--ink); border-top:2px solid var(--line); padding-top:18px; white-space:pre-wrap; font-weight:500; }
+  .copy-row { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .copy-btn { background:#fff; border:2px solid var(--teal); color:var(--teal); font-family:'Inter',sans-serif; font-size:13px; font-weight:700; padding:6px 14px; border-radius:20px; cursor:pointer; transition:all .15s; white-space:nowrap; }
+  .copy-btn:hover { background:var(--teal); color:#fff; }
+  .copy-btn.done { background:var(--teal); color:#fff; border-color:var(--teal); }
+  .copy-all { display:inline-flex; align-items:center; gap:8px; background:var(--ink); color:#fff; border:none; font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; padding:14px 26px; border-radius:12px; cursor:pointer; margin-top:6px; transition:background .15s; }
+  .copy-all:hover { background:#000; }
+  .copy-all.done { background:var(--teal); }
+  .loop-note { font-size:14px; color:var(--muted); margin:2px 0 16px; }
+  .next { background:var(--black); color:#fff; border-radius:18px; padding:30px; margin-bottom:30px; }
+  .next .kicker { color:var(--teal-bright); font-family:'JetBrains Mono',monospace; font-size:13px; text-transform:uppercase; letter-spacing:.12em; margin-bottom:14px; font-weight:500; }
+  .next h3 { font-family:'Space Grotesk',sans-serif; font-size:26px; margin-bottom:18px; font-weight:700; }
+  .next ul { list-style:none; padding:0; }
+  .next ul li { position:relative; padding-left:28px; margin-bottom:14px; font-size:16.5px; line-height:1.5; }
+  .next ul li::before { content:"→"; position:absolute; left:0; color:var(--pink); font-family:'JetBrains Mono',monospace; font-weight:700; font-size:18px; }
+  .platforms { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+  .pill { font-family:'JetBrains Mono',monospace; font-size:14px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); padding:8px 14px; border-radius:30px; }
+  .feedback { background:var(--soft); border:2px dashed var(--pink); border-radius:18px; padding:28px 30px; margin-bottom:50px; text-align:center; }
+  .feedback h3 { font-family:'Space Grotesk',sans-serif; font-size:24px; margin-bottom:10px; color:var(--ink); font-weight:700; }
+  .feedback p { font-size:16.5px; color:var(--muted); margin-bottom:20px; }
+  .feedback a { display:inline-block; background:var(--teal); color:#fff; text-decoration:none; padding:15px 30px; border-radius:12px; font-weight:700; font-size:18px; font-family:'Space Grotesk',sans-serif; }
+  footer { background:var(--black); color:#9a9aa8; padding:28px 0; font-size:14px; text-align:center; }
+  .demo-tag { font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--pink); color:#fff; padding:4px 11px; border-radius:5px; font-weight:600; }
+  footer .legal { margin-top:12px; font-size:12.5px; color:#66667a; }
+
+  /* Exit-intent modal — playful, never guilt-trippy */
+  .exit-overlay { position:fixed; inset:0; background:rgba(20,20,26,.6); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; z-index:1000; padding:24px; animation:fadeIn .2s ease; }
+  .exit-overlay.show { display:flex; }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  .exit-card { background:#fff; border-radius:22px; max-width:440px; width:100%; padding:40px 34px; text-align:center; box-shadow:0 24px 60px rgba(20,20,26,.35); animation:popIn .3s cubic-bezier(.2,.9,.3,1.2); position:relative; }
+  @keyframes popIn { from{opacity:0; transform:scale(.9) translateY(10px)} to{opacity:1; transform:none} }
+  .exit-emoji { font-size:46px; margin-bottom:10px; }
+  .exit-card h3 { font-family:'Space Grotesk',sans-serif; font-size:28px; font-weight:700; color:var(--ink); line-height:1.1; margin-bottom:12px; letter-spacing:-.02em; }
+  .exit-card p { font-size:17px; color:var(--muted); margin-bottom:26px; line-height:1.5; }
+  .exit-stay { display:block; width:100%; background:var(--pink); color:#fff; border:none; border-radius:13px; padding:17px; font-family:'Space Grotesk',sans-serif; font-size:19px; font-weight:700; cursor:pointer; transition:background .15s,transform .1s; box-shadow:0 4px 14px rgba(255,61,139,.3); }
+  .exit-stay:hover { background:var(--pink-deep); transform:translateY(-2px); }
+  .exit-leave { display:block; width:100%; background:none; border:none; color:var(--muted); font-family:'Inter',sans-serif; font-size:15px; font-weight:500; cursor:pointer; margin-top:14px; padding:8px; }
+  .exit-leave:hover { color:var(--ink); text-decoration:underline; }
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="brand"><span class="logo">shipd<span class="dot">.</span></span><span class="tagline">posts &rarr; product</span></div></div></header>
+<div class="wrap">
+  <section class="hero">
+    <div class="eyebrow reveal d1">Live now</div>
+    <h1 class="reveal d2">You already wrote it.<br>Now <span class="pop">sell</span> it.</h1>
+    <p class="sub reveal d3">Your posts are full of products you haven't made yet. shipd finds them — the outline, the copy, the price, where to sell. Pick a creator type and watch.</p>
+  </section>
+  <div class="panel reveal d4">
+    <div class="panel-label">See it work</div>
+    <div class="panel-hint">Tap a creator type. Four seconds, real product:</div>
+    <div class="chips" id="chips">
+      <button class="chip pulse" data-key="agent">Real estate agent</button>
+      <button class="chip pulse" data-key="fitness">Fitness coach</button>
+      <button class="chip pulse" data-key="finance">Finance creator</button>
+      <button class="chip pulse" data-key="career">Career coach</button>
+    </div>
+    <div style="margin-top:24px;">
+      <div class="panel-label">Or run your own</div>
+      <div class="panel-hint">Paste 2&ndash;4 of your best posts from any platform &mdash; shipd builds from your actual words.</div>
+      <textarea id="content" placeholder="Paste your best posts here..."></textarea>
+    </div>
+    <button class="btn" id="generate">Show me the product &rarr;</button>
+    <div class="loading" id="loading"><div class="spinner"></div><span id="loadingText">Reading the content...</span></div>
+  </div>
+  <section class="results" id="results">
+    <div class="result-head"><span class="chk">&#10003;</span><h2>Here's what they could ship</h2></div>
+    <p class="ai-note">shipd generates suggestions using AI. Output may be imperfect &mdash; review and edit everything before you sell it. You're responsible for your final product, its claims, and its compliance.</p>
+    <div id="output" aria-live="polite"></div>
+    <div class="feedback">
+      <h3>Made something good?</h3>
+      <p>Tell us what shipd built for you &mdash; the wins, the misses, all of it. We read every one.</p>
+      <a href="#" id="feedbackLink" target="_blank">Drop us a line &rarr;</a>
+    </div>
+  </section>
+</div>
+<footer><div class="wrap"><span class="demo-tag">shipd</span> &nbsp; Turn your posts into a product. Any creator, any platform.<div class="legal">&copy; 2026 shipd &middot; <a href="#" style="color:#9a9aa8;">Terms</a> &middot; <a href="#" style="color:#9a9aa8;">Privacy</a> &middot; <a href="#" style="color:#9a9aa8;">Refunds</a> &middot; Not affiliated with or endorsed by any social platform &middot; An independent tool for creators</div></div></footer>
+<script>
+const EXAMPLES = {
+  agent: { productType:"Digital Playbook", productName:"The No-Missed-Deadline Deal System", price:"$59", oneLiner:"The exact compliance-and-deadline system that keeps every deal from dying on a technicality.", whoFor:"New real estate agents drowning in forms, deadlines, and compliance steps.", modules:[{title:"The 5-Step FINTRAC Flow",desc:"Turn compliance from scary paperwork into a repeatable checklist."},{title:"The Deadline Tracker",desc:"Every condition, every date, mapped so nothing slips."},{title:"Why Deals Really Die",desc:"The non-price reasons deals collapse \u2014 and how to prevent each."},{title:"First-Week-of-a-Deal Checklist",desc:"Exactly what to do in the 7 days after an accepted offer."},{title:"Copy-Paste Client Scripts",desc:"What to say at each step so clients feel safe, not interrogated."}], salesCopy:"You didn't get into real estate to become a paperwork clerk. But one missed deadline can kill a deal you worked months for. This is the exact system I run on every transaction \u2014 so compliance becomes a 5-minute checklist instead of a 2am panic. Steal my system. Never lose a deal to a technicality again.", whereToSell:["Your LinkedIn \u2014 pin it to your profile.","Brokerage new-agent onboarding \u2014 pitch it as a training tool.","Local real estate Facebook groups where new agents gather."] },
+  fitness: { productType:"Notion Template + Guide", productName:"The 20-Minute Strong Parent Plan", price:"$39", oneLiner:"Get measurably stronger in 20 minutes, 3x a week \u2014 built for people with zero spare time.", whoFor:"Busy parents who want strength without living in the gym.", modules:[{title:"The 4 Movements That Matter",desc:"Why these four cover 90% of what your body needs."},{title:"The 20-Minute Templates",desc:"Plug-and-play sessions \u2014 no planning, just press play."},{title:"Progressive Overload Tracker",desc:"A simple phone-based log so you actually see progress."},{title:"The 'No-Time' Week Plan",desc:"How to stay consistent during the chaos weeks."},{title:"Swap Library",desc:"Travel? No equipment? Sub any movement in seconds."}], salesCopy:"You don't need more time. You need the right 20 minutes. This is the exact plan I give busy parents who are done feeling weak and tired but can't live in a gym. Four movements. Three sessions a week. Real, trackable strength \u2014 built for the life you actually have.", whereToSell:["Instagram + bio link \u2014 your before/afters already sell this.","Your email list \u2014 one launch email converts warm followers.","Parent communities where time-poor people gather."] },
+  finance: { productType:"Mini-Course", productName:"Boring Money: Set-It-and-Forget-It Investing", price:"$79", oneLiner:"Set up a portfolio in one afternoon that quietly beats most professionals \u2014 then ignore it.", whoFor:"Regular people intimidated by investing who want a simple, proven system.", modules:[{title:"Why Boring Wins",desc:"The data on why simple portfolios beat active managers."},{title:"The 3-Fund Setup",desc:"Exactly which funds, in what proportion, and why."},{title:"One-Afternoon Setup Walkthrough",desc:"Screen-by-screen, open the account and fund it."},{title:"The Twice-a-Year Check-In",desc:"The only maintenance you'll ever need."},{title:"Avoiding the Fee Traps",desc:"Spot the hidden costs draining your returns."}], salesCopy:"Investing isn't supposed to be a full-time job \u2014 or a casino. This is the boring, proven system I teach regular people: three funds, one afternoon to set up, two check-ins a year. No day trading. No crypto gambling. Just a portfolio that quietly outperforms most pros while you get on with your life.", whereToSell:["LinkedIn \u2014 your myth-busting posts are the perfect funnel.","A free 'fee calculator' lead magnet \u2192 upsell the course.","YouTube description links if you explain concepts on video."] },
+  career: { productType:"Template Pack + Guide", productName:"The Hiring Manager's Resume Framework", price:"$49", oneLiner:"Reframe your experience using the exact framework hiring managers wish every applicant knew.", whoFor:"Job seekers getting ghosted who don't know why their resume isn't landing.", modules:[{title:"The 90% Rejection Reasons",desc:"The fixable mistakes that kill most resumes in 6 seconds."},{title:"The Reframe Framework",desc:"Turn 'duties' into impact a hiring manager can't ignore."},{title:"Plug-and-Play Templates",desc:"Proven layouts that pass both humans and bots."},{title:"The Bullet Formula",desc:"The exact structure for accomplishment lines that land."},{title:"Before/After Examples",desc:"Real rewrites so you see the framework in action."}], salesCopy:"You're not 'not good enough.' Your resume just isn't framing your experience the way hiring managers read it. I've reviewed over 1,000 resumes from the other side of the desk \u2014 and 90% get cut for the same fixable reasons. This is the exact framework I wish every applicant used. Fix the framing. Get the callback.", whereToSell:["LinkedIn \u2014 job-search content gets massive reach.","Your DMs \u2014 you already get 'can you review my resume?' asks.","Career and layoff support communities where people need this today."] }
+};
+const FEEDBACK_URL = "mailto:youremail@example.com?subject=shipd%20feedback";
+const chips=document.getElementById('chips'),btn=document.getElementById('generate'),loading=document.getElementById('loading'),loadingText=document.getElementById('loadingText'),results=document.getElementById('results'),output=document.getElementById('output'),feedbackLink=document.getElementById('feedbackLink'),contentBox=document.getElementById('content');
+feedbackLink.href=FEEDBACK_URL;
+let selectedKey=null;
+const LM=["Reading the content and finding the product...","Identifying the most sellable expertise...","Structuring the offer...","Writing the sales copy...","Pricing it and finding where to sell..."];
+chips.addEventListener('click',e=>{ if(!e.target.classList.contains('chip'))return; selectedKey=e.target.dataset.key; chips.classList.add('touched'); [...chips.children].forEach(c=>c.classList.remove('active')); e.target.classList.add('active'); });
+btn.addEventListener('click', async ()=>{
+  const pasted = (contentBox.value || "").trim();
+  // If they pasted their own content, run REAL AI. Otherwise use the tapped example.
+  if (pasted.length >= 40) { await generateLive(pasted); return; }
+  if (!selectedKey) { showError("Tap an example above, or paste a couple of your own posts (a few sentences) to run it for real."); return; }
+  // instant example path (free, no API cost)
+  startLoading();
+  setTimeout(()=>{ stopLoading(); render(EXAMPLES[selectedKey]); showResults(); }, 2600);
+});
+
+async function generateLive(content){
+  startLoading();
+  const controller = new AbortController();
+  const timeout = setTimeout(()=>controller.abort(), 20000); // fail clean if the API hangs
+  try {
+    const r = await fetch("/api/generate", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ content: content, audience: "your audience", format: "auto" }),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    const data = await r.json();
+    if (!r.ok) {
+      stopLoading();
+      if (data.limit) showError("You've hit today's free limit. Come back tomorrow or get in touch to keep going.");
+      else if (data.capped) showError("shipd is at capacity for today — check back tomorrow.");
+      else showError(data.error || "Something went sideways. Try again in a moment.");
+      return;
+    }
+    stopLoading();
+    render(data);
+    showResults();
+  } catch (err) {
+    clearTimeout(timeout);
+    stopLoading();
+    if (err.name === "AbortError") showError("That took too long. Try again — usually it's quick.");
+    else showError("Couldn't reach the engine. Check your connection and try again.");
+  }
+}
+
+function startLoading(){ results.classList.remove('show'); hideError(); btn.disabled=true; loading.classList.add('show'); let i=0; loadingText.textContent=LM[0]; window.__lmTimer=setInterval(()=>{i=(i+1)%LM.length;loadingText.textContent=LM[i];},900); }
+function stopLoading(){ clearInterval(window.__lmTimer); loading.classList.remove('show'); btn.disabled=false; }
+function showResults(){ results.classList.add('show'); const h=document.querySelector('.result-head h2'); if(h){ h.setAttribute('tabindex','-1'); h.focus(); } results.scrollIntoView({behavior:'smooth',block:'start'}); }
+function showError(msg){ let e=document.getElementById('errBox'); if(!e){ e=document.createElement('div'); e.id='errBox'; e.setAttribute('role','alert'); e.style.cssText='margin-top:18px;padding:14px 18px;border-radius:12px;background:#fff0f5;border:1.5px solid var(--pink);color:#14141a;font-size:15px;font-weight:500;'; btn.parentNode.insertBefore(e, btn.nextSibling); } e.textContent=msg; }
+function hideError(){ const e=document.getElementById('errBox'); if(e) e.remove(); }
+function render(p){ const m=p.modules.map(x=>`<div class="module"><strong>${esc(x.title)}</strong><span>${esc(x.desc)}</span></div>`).join(""); const c=p.whereToSell.map(x=>`<li>${esc(x)}</li>`).join(""); const modulesText=p.modules.map(x=>`• ${x.title}: ${x.desc}`).join("\n"); window.__shipdProduct=p; window.__shipdModulesText=modulesText; output.innerHTML=`<div class="out"><div class="copy-row"><div class="kicker">${esc(p.productType)}</div><button class="copy-btn" onclick="copyField('title')">Copy title</button></div><h3>${esc(p.productName)}</h3><div class="copy-row"><div class="price-tag">${esc(p.price)}</div><button class="copy-btn" onclick="copyField('price')">Copy price</button></div><p><strong>${esc(p.oneLiner)}</strong></p><p class="who">${esc(p.whoFor)}</p></div><div class="out"><div class="copy-row"><div class="kicker">What's inside</div><button class="copy-btn" onclick="copyField('modules')">Copy outline</button></div>${m}</div><div class="out"><div class="copy-row"><div class="kicker">Sales copy &mdash; ready to paste</div><button class="copy-btn" onclick="copyField('sales')">Copy copy</button></div><div class="salescopy">${esc(p.salesCopy)}</div></div><div class="next"><div class="kicker">Ship it &mdash; tight loop</div><h3>Where to sell this</h3><ul>${c}</ul><div class="platforms"><span class="pill">Stan Store</span><span class="pill">Gumroad</span><span class="pill">Your own Stripe link</span></div><p class="loop-note" style="color:#c8c8d2;margin-top:18px;">Grab everything in one tap, paste into your storefront, you're live:</p><button class="copy-all" onclick="copyAll()" id="copyAllBtn">Copy the whole product &rarr;</button></div>`; }
+function copyField(which){ const p=window.__shipdProduct; if(!p)return; let text=""; if(which==='title')text=p.productName; else if(which==='price')text=p.price; else if(which==='modules')text=window.__shipdModulesText; else if(which==='sales')text=p.salesCopy; doCopy(text,event.target); }
+function copyAll(){ const p=window.__shipdProduct; if(!p)return; const text=`${p.productName}\n${p.productType} — ${p.price}\n\n${p.oneLiner}\nFor: ${p.whoFor}\n\nWHAT'S INSIDE:\n${window.__shipdModulesText}\n\nSALES COPY:\n${p.salesCopy}\n\nWHERE TO SELL:\n${p.whereToSell.map(x=>'• '+x).join("\n")}`; const btn=document.getElementById('copyAllBtn'); doCopy(text,btn,"Copied! Now paste into your storefront ✓","Copy the whole product →"); }
+function doCopy(text,btn,doneLabel,resetLabel){ navigator.clipboard.writeText(text).then(()=>{ const orig=btn.textContent; btn.textContent=doneLabel||"Copied ✓"; btn.classList.add('done'); setTimeout(()=>{ btn.textContent=resetLabel||orig; btn.classList.remove('done'); },2000); }).catch(()=>{ alert("Copy failed — select and copy manually."); }); }
+function esc(s){return String(s==null?'':s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+</script>
+<div class="exit-overlay" id="exitModal">
+  <div class="exit-card">
+    <div class="exit-emoji" style="font-size:54px; color:var(--pink); line-height:1; font-family:'Space Grotesk',sans-serif; font-weight:700;">.</div>
+    <h3 id="exitHeadline">Leaving already?</h3>
+    <p id="exitSub">Four seconds and you'd have seen the whole thing. But sure, live with the mystery.</p>
+    <button class="exit-stay" id="exitStay">Fine, show me &rarr;</button>
+    <button class="exit-leave" id="exitLeave">I'll be back</button>
+  </div>
+</div>
+
+<script>
+// Exit-intent — fires once, only on desktop mouse-leave-to-top, never naggy
+(function(){
+  var shown = false;
+  var modal = document.getElementById('exitModal');
+  // a few on-brand, sassy-but-kind lines (rotates randomly)
+  var lines = [
+    ["Leaving already?", "Four seconds and you'd have seen the whole thing. But sure, live with the mystery."],
+    ["Bold move, leaving now.", "One tap shows you exactly what shipd does. Your call — we'll be here."],
+    ["You'll be back.", "They always are. Tap an example before you go — save yourself the second trip."],
+    ["Cool, cool. Walking out before the good part.", "Tap one example. Four seconds. Then leave if you're not impressed."],
+    ["No rush.", "But the thing that turns your posts into a product is right there. One tap."]
+  ];
+  function showExit(){
+    if(shown) return;
+    shown = true;
+    var pick = lines[Math.floor(Math.random()*lines.length)];
+    document.getElementById('exitHeadline').textContent = pick[0];
+    document.getElementById('exitSub').textContent = pick[1];
+    modal.classList.add('show');
+  }
+  // desktop: mouse leaves toward the top (closing/switching tab)
+  document.addEventListener('mouseout', function(e){
+    if(e.clientY <= 0 && !e.relatedTarget) showExit();
+  });
+  document.getElementById('exitStay').addEventListener('click', function(){
+    modal.classList.remove('show');
+    document.getElementById('chips').scrollIntoView({behavior:'smooth', block:'center'});
+  });
+  document.getElementById('exitLeave').addEventListener('click', function(){
+    modal.classList.remove('show');
+  });
+  modal.addEventListener('click', function(e){
+    if(e.target === modal) modal.classList.remove('show');
+  });
+})();
+</script>
+
+</body>
+</html>

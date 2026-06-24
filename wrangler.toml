@@ -1,0 +1,10 @@
+name = "shipd"
+main = "src/index.js"
+compatibility_date = "2026-06-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Serves everything in /public as the static site.
+# The Worker (src/index.js) runs for /api/generate; static files are served for the rest.
+[assets]
+directory = "./public"
+binding = "ASSETS"
